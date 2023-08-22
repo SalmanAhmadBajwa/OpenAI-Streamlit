@@ -3,6 +3,37 @@ import modal
 import json
 import os
 
+# Styling
+st.markdown("""
+    <style>
+        /* Gradient Background */
+        body {
+            background: linear-gradient(90deg, #FF9D9D, #FBD786, #C6FFDD, #A5DFF9);
+        }
+
+        .sidebar .sidebar-content {
+            background-color: rgba(255, 255, 255, 0.1); /* Slight white background */
+        }
+
+        h1, h2 {
+            color: #FBD786; /* Yellowish tint */
+        }
+
+        h3, h4 {
+            color: #A5DFF9; /* Bluish tint */
+        }
+
+        .stButton:hover {
+            background-color: #FF9D9D !important; /* Pinkish-red tint on hover */
+        }
+
+        input[type="text"], select {
+            border: 1px solid #A5DFF9; /* Bluish border for inputs */
+        }
+
+    </style>
+""", unsafe_allow_html=True)
+
 def main():
     st.title("Newsletter Dashboard")
 
@@ -18,8 +49,6 @@ def main():
     if selected_podcast:
 
         podcast_info = available_podcast_info[selected_podcast]
-
-
 
         # Right section - Newsletter content
         st.header("Newsletter Content")
