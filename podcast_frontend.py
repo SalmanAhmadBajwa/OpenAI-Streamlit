@@ -19,6 +19,8 @@ def main():
 
         podcast_info = available_podcast_info[selected_podcast]
 
+
+
         # Right section - Newsletter content
         st.header("Newsletter Content")
 
@@ -111,7 +113,7 @@ def create_dict_from_json_files(folder_path):
         file_path = os.path.join(folder_path, file_name)
         with open(file_path, 'r') as file:
             podcast_info = json.load(file)
-            podcast_name = podcast_info.get('podcast_details', {}).get('podcast_title', 'Unknown Podcast')
+            podcast_name = podcast_info['podcast_details']['podcast_title']
             # Process the file data as needed
             data_dict[podcast_name] = podcast_info
 
