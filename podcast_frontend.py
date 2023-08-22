@@ -3,36 +3,27 @@ import modal
 import json
 import os
 
-# Styling
-st.markdown("""
+# Set page configuration
+st.set_page_config(
+    page_title="Newsletter Dashboard",
+    page_icon="🎙️",
+    layout="wide"
+)
+
+# Dark Theme
+# You can further customize the dark theme colors to your preference
+dark_theme = """
     <style>
-        /* Gradient Background */
         body {
-            background: linear-gradient(90deg, #FF9D9D, #FBD786, #C6FFDD, #A5DFF9);
+            background-color: #121212;
+            color: #FFFFFF;
         }
-
-        .sidebar .sidebar-content {
-            background-color: rgba(255, 255, 255, 0.1); /* Slight white background */
+        .stTextInput > div {
+            background-color: #333333 !important;
         }
-
-        h1, h2 {
-            color: #FBD786; /* Yellowish tint */
-        }
-
-        h3, h4 {
-            color: #A5DFF9; /* Bluish tint */
-        }
-
-        .stButton:hover {
-            background-color: #FF9D9D !important; /* Pinkish-red tint on hover */
-        }
-
-        input[type="text"], select {
-            border: 1px solid #A5DFF9; /* Bluish border for inputs */
-        }
-
     </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(dark_theme, unsafe_allow_html=True)
 
 def main():
     st.title("Newsletter Dashboard")
@@ -42,97 +33,49 @@ def main():
     # Left section - Input fields
     st.sidebar.header("Podcast RSS Feeds")
 
-    # Dropdown box
-    st.sidebar.subheader("Available Podcasts Feeds")
-    selected_podcast = st.sidebar.selectbox("Select Podcast", options=available_podcast_info.keys())
+    # Dropdown box for selecting pre-existing podcasts
+    st.sidebar.subheader("Available Podcasts")
+    selected_podcast = st.sidebar.selectbox("Select Podcast", options=[""] + list(available_podcast_info.keys()))
 
+    # Show podcast details only when a podcast is selected
     if selected_podcast:
-
         podcast_info = available_podcast_info[selected_podcast]
+        display_podcast_details(podcast_info)
 
-        # Right section - Newsletter content
-        st.header("Newsletter Content")
+def display_podcast_details(podcast_info):
+    # Right section - Newsletter content
+    st.header("Newsletter Content")
 
-        # Display the podcast title
-        st.subheader("Episode Title")
-        st.write(podcast_info['podcast_details']['episode_title'])
+    # Podcast Container
+    with st.container(key="podcast", class_="podcast-container"):
+        # Podcast Cover
+        with st.container(key="cover", class_="podcast-cover"):
+            st.image(
+                podcast_info['podcast_details']['episode_image'],
+                caption="Podcast Cover",
+                width=300,
+                use_column_width=True
+            )
 
-        # Display the podcast summary and the cover image in a side-by-side layout
-        col1, col2 = st.columns([7, 3])
+        # Podcast Details
+        with st.container(key="details", class_="podcast-details"):
+            st.subheader("Episode Title")
+            st.write(podcast_info['podcast_details']['episode_title'])
 
-        with col1:
-            # Display the podcast episode summary
             st.subheader("Podcast Episode Summary")
             st.write(podcast_info['podcast_summary'])
 
-        with col2:
-            st.image(podcast_info['podcast_details']['episode_image'], caption="Podcast Cover", width=300, use_column_width=True)
-
-        # Display the podcast guest and their details in a side-by-side layout
-        col3, col4 = st.columns([3, 7])
-
-        with col3:
             st.subheader("Podcast Guest")
             st.write(podcast_info['podcast_guest']['name'])
 
-        with col4:
             st.subheader("Podcast Guest Details")
             st.write(podcast_info["podcast_guest"]['summary'])
 
-        # Display the five key moments
-        st.subheader("Key Moments")
-        key_moments = podcast_info['podcast_highlights']
-        for moment in key_moments.split('\n'):
-            st.markdown(
-                f"<p style='margin-bottom: 5px;'>{moment}</p>", unsafe_allow_html=True)
-
-    # User Input box
-    st.sidebar.subheader("Add and Process New Podcast Feed")
-    url = st.sidebar.text_input("Link to RSS Feed")
-
-    process_button = st.sidebar.button("Process Podcast Feed")
-    st.sidebar.markdown("**Note**: Podcast processing can take upto 5 mins, please be patient.")
-
-    if process_button:
-
-        # Call the function to process the URLs and retrieve podcast guest information
-        podcast_info = process_podcast_info(url)
-
-        # Right section - Newsletter content
-        st.header("Newsletter Content")
-
-        # Display the podcast title
-        st.subheader("Episode Title")
-        st.write(podcast_info['podcast_details']['episode_title'])
-
-        # Display the podcast summary and the cover image in a side-by-side layout
-        col1, col2 = st.columns([7, 3])
-
-        with col1:
-            # Display the podcast episode summary
-            st.subheader("Podcast Episode Summary")
-            st.write(podcast_info['podcast_summary'])
-
-        with col2:
-            st.image(podcast_info['podcast_details']['episode_image'], caption="Podcast Cover", width=300, use_column_width=True)
-
-        # Display the podcast guest and their details in a side-by-side layout
-        col3, col4 = st.columns([3, 7])
-
-        with col3:
-            st.subheader("Podcast Guest")
-            st.write(podcast_info['podcast_guest']['name'])
-
-        with col4:
-            st.subheader("Podcast Guest Details")
-            st.write(podcast_info["podcast_guest"]['summary'])
-
-        # Display the five key moments
-        st.subheader("Key Moments")
-        key_moments = podcast_info['podcast_highlights']
-        for moment in key_moments.split('\n'):
-            st.markdown(
-                f"<p style='margin-bottom: 5px;'>{moment}</p>", unsafe_allow_html=True)
+            st.subheader("Key Moments")
+            key_moments = podcast_info['podcast_highlights']
+            for moment in key_moments.split('\n'):
+                st.markdown(
+                    f"<p style='margin-bottom: 5px;'>{moment}</p>", unsafe_allow_html=True)
 
 def create_dict_from_json_files(folder_path):
     json_files = [f for f in os.listdir(folder_path) if f.endswith('.json')]
@@ -141,17 +84,17 @@ def create_dict_from_json_files(folder_path):
     for file_name in json_files:
         file_path = os.path.join(folder_path, file_name)
         with open(file_path, 'r') as file:
-            podcast_info = json.load(file)
-            podcast_name = podcast_info['podcast_details']['podcast_title']
-            # Process the file data as needed
-            data_dict[podcast_name] = podcast_info
+            try:
+                podcast_info = json.load(file)
+                if 'podcast_details' in podcast_info and 'podcast_title' in podcast_info['podcast_details']:
+                    podcast_name = podcast_info['podcast_details']['podcast_title']
+                    data_dict[podcast_name] = podcast_info
+                else:
+                    print(f"Error: Missing keys in {file_name}")
+            except json.JSONDecodeError:
+                print(f"Error decoding JSON in {file_name}")
 
     return data_dict
-
-def process_podcast_info(url):
-    f = modal.Function.lookup("corise-podcast-project", "process_podcast")
-    output = f.call(url, '/content/podcast/')
-    return output
 
 if __name__ == '__main__':
     main()
