@@ -133,7 +133,6 @@ def main():
         for moment in key_moments.split('\n'):
             st.markdown(
                 f"<p style='margin-bottom: 5px;'>{moment}</p>", unsafe_allow_html=True)
-
 def create_dict_from_json_files(folder_path):
     json_files = [f for f in os.listdir(folder_path) if f.endswith('.json')]
     data_dict = {}
@@ -141,10 +140,15 @@ def create_dict_from_json_files(folder_path):
     for file_name in json_files:
         file_path = os.path.join(folder_path, file_name)
         with open(file_path, 'r') as file:
-            podcast_info = json.load(file)
-            podcast_name = podcast_info['podcast_details']['podcast_title']
-            # Process the file data as needed
-            data_dict[podcast_name] = podcast_info
+            try:
+                podcast_info = json.load(file)
+                if 'podcast_details' in podcast_info and 'podcast_title' in podcast_info['podcast_details']:
+                    podcast_name = podcast_info['podcast_details']['podcast_title']
+                    data_dict[podcast_name] = podcast_info
+                else:
+                    print(f"Error: Missing keys in {file_name}")
+            except json.JSONDecodeError:
+                print(f"Error decoding JSON in {file_name}")
 
     return data_dict
 
